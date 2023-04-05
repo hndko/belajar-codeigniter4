@@ -16,7 +16,7 @@
                                 <b>Penulis : </b> <?= $komik['penulis'] ?> <br>
                                 <small class="text-body-secondary"><b>Penerbit : </b><?= $komik['penerbit'] ?></small>
                             </p>
-                            <a href="" class="btn btn-warning btn-sm">Edit</a>
+                            <a href="/komik/edit/<?= $komik['slug'] ?>" class="btn btn-warning btn-sm">Edit</a>
                             <form action="/komik/delete/<?= $komik['id'] ?>" method="post" class="d-inline">
                                 <?= csrf_field() ?>
                                 <input type="hidden" name="_method" value="DELETE">
