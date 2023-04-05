@@ -55,7 +55,7 @@ class Komik extends BaseController
         // session();
         $data = [
             'title' => 'Form Tambah Data Komik',
-            'validation' => \Config\Services::validation()
+            // 'validation' => \Config\Services::validation()
         ];
 
         // d($data['validation']);
@@ -72,25 +72,26 @@ class Komik extends BaseController
         ];
 
         if (!$this->validate($rules)) {
-            $data = [
-                'title' => 'Form Tambah Data Komik',
-                'validation' => \Config\Services::validation()
-            ];
+            // $data = [
+            //     'title' => 'Form Tambah Data Komik',
+            //     'validation' => \Config\Services::validation()
+            // ];
 
-            return view('komik/create', $data);
-        } else {
-            $slug = url_title($this->request->getVar('judul'), '-', true);
-            $this->komikModel->save([
-                'judul' => $this->request->getVar('judul'),
-                'slug' => $slug,
-                'penulis' => $this->request->getVar('penulis'),
-                'penerbit' => $this->request->getVar('penerbit'),
-                'sampul' => $this->request->getVar('sampul'),
-            ]);
-
-            session()->setFlashdata('messa ge', 'Data Berhasil Ditambahkan.');
-            return redirect()->to('/komik');
+            // return view('komik/create', $data);
+            return redirect()->back()->withInput();
         }
+
+        $slug = url_title($this->request->getVar('judul'), '-', true);
+        $this->komikModel->save([
+            'judul' => $this->request->getVar('judul'),
+            'slug' => $slug,
+            'penulis' => $this->request->getVar('penulis'),
+            'penerbit' => $this->request->getVar('penerbit'),
+            'sampul' => $this->request->getVar('sampul'),
+        ]);
+
+        session()->setFlashdata('message', 'Data Berhasil Ditambahkan.');
+        return redirect()->to('/komik');
     }
 
     public function delete($id)
@@ -104,7 +105,7 @@ class Komik extends BaseController
     {
         $data = [
             'title' => 'Form Ubah Data Komik',
-            'validation' => \Config\Services::validation(),
+            // 'validation' => \Config\Services::validation(),
             'komik' => $this->komikModel->getKomik($slug)
         ];
 
@@ -113,6 +114,23 @@ class Komik extends BaseController
 
     public function update($id)
     {
+        $komikLama = $this->komikModel->getKomik($this->request->getVar('slug'));
+        if ($komikLama['judul'] == $this->request->getVar('judul')) {
+            $rule_judul = 'required|min_length[5]';
+        } else {
+            $rule_judul = 'required|is_unique[tb_komik.judul]|min_length[5]';
+        }
+
+        $rules = [
+            'judul' => $rule_judul,
+            'penulis' => 'required',
+            'penerbit' => 'required',
+        ];
+
+        if (!$this->validate($rules)) {
+            return redirect()->back()->withInput();
+        }
+
         $slug = url_title($this->request->getVar('judul'), '-', true);
         $this->komikModel->save([
             'id' => $id,
@@ -123,7 +141,7 @@ class Komik extends BaseController
             'sampul' => $this->request->getVar('sampul'),
         ]);
 
-        session()->setFlashdata('messa ge', 'Data Berhasil Diubahkan.');
+        session()->setFlashdata('message', 'Data Berhasil Diubahkan.');
         return redirect()->to('/komik');
     }
 }
