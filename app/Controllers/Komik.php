@@ -7,6 +7,8 @@ use App\Models\KomikModel;
 class Komik extends BaseController
 {
     protected $komikModel;
+    protected $helpers = ['form'];
+
     public function __construct()
     {
         $this->komikModel = new KomikModel();
@@ -50,36 +52,51 @@ class Komik extends BaseController
 
     public function create()
     {
+        session();
         $data = [
-            'title' => 'Form Tambah Data Komik'
+            'title' => 'Form Tambah Data Komik',
+            'validation' => \Config\Services::validation()
         ];
+
+        // d($data['validation']);
 
         return view('komik/create', $data);
     }
 
     public function store()
     {
-        if (!$this->validate([
-            'judul' => 'required|is_unique[tb_komik.judul]'
-        ])) {
-            $validation = \Config\Services::validation();
-            dd($validation);
+        $rules = [
+            'judul' => 'required|is_unique[tb_komik.judul]|min_length[5]',
+            'penulis' => 'required',
+            'penerbit' => 'required',
+        ];
 
-            return redirect()->to('/komik/create');
+        if (!$this->validate($rules)) {
+            $data = [
+                'title' => 'Form Tambah Data Komik',
+                'validation' => \Config\Services::validation()
+            ];
+
+            return view('komik/create', $data);
+        } else {
+            $slug = url_title($this->request->getVar('judul'), '-', true);
+            $this->komikModel->save([
+                'judul' => $this->request->getVar('judul'),
+                'slug' => $slug,
+                'penulis' => $this->request->getVar('penulis'),
+                'penerbit' => $this->request->getVar('penerbit'),
+                'sampul' => $this->request->getVar('sampul'),
+            ]);
+
+            session()->setFlashdata('message', 'Data Berhasil Ditambahkan.');
+            return redirect()->to('/komik');
         }
+    }
 
-
-        $slug = url_title($this->request->getVar('judul'), '-', true);
-        $this->komikModel->save([
-            'judul' => $this->request->getVar('judul'),
-            'slug' => $slug,
-            'penulis' => $this->request->getVar('penulis'),
-            'penerbit' => $this->request->getVar('penerbit'),
-            'sampul' => $this->request->getVar('sampul'),
-        ]);
-
-        session()->setFlashdata('message', 'Data Berhasil Ditambahkan.');
-
+    public function delete($id)
+    {
+        $this->komikModel->delete($id);
+        session()->setFlashdata('message', 'Data Berhasil Dihapuskan.');
         return redirect()->to('/komik');
     }
 }

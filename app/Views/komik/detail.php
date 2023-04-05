@@ -17,7 +17,11 @@
                                 <small class="text-body-secondary"><b>Penerbit : </b><?= $komik['penerbit'] ?></small>
                             </p>
                             <a href="" class="btn btn-warning btn-sm">Edit</a>
-                            <a href="" class="btn btn-danger btn-sm">Danger</a>
+                            <form action="/komik/delete/<?= $komik['id'] ?>" method="post" class="d-inline">
+                                <?= csrf_field() ?>
+                                <input type="hidden" name="_method" value="DELETE">
+                                <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+                            </form>
                             <a href="/komik" class="btn btn-info btn-sm">Kembali Ke Daftar Komik</a>
                         </div>
                     </div>
